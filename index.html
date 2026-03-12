@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>OKX Web3 Infra â Issue Tracker Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0d0f14;
+    --panel: #161a23;
+    --border: #252b38;
+    --accent: #3b82f6;
+    --accent2: #6366f1;
+    --accent3: #10b981;
+    --accent4: #f59e0b;
+    --accent5: #ef4444;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --card-radius: 16px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter','Segoe UI',sans-serif;
+    padding: 32px 24px;
+  }
+  header {
+    display: flex; align-items: center;
+    justify-content: space-between;
+    margin-bottom: 32px; flex-wrap: wrap; gap: 12px;
+  }
+  header .title-block h1 { font-size: 24px; font-weight: 700; letter-spacing: -.5px; }
+  header .title-block p  { font-size: 13px; color: var(--muted); margin-top: 4px; }
+  .badge {
+    background: #1e2533; border: 1px solid var(--border);
+    border-radius: 8px; padding: 6px 14px; font-size: 12px; color: var(--muted);
+  }
+  .badge span { color: var(--accent); font-weight: 600; }
+
+  /* ââ KPI ââ */
+  .kpi-row { display: grid; grid-template-columns: repeat(auto-fit,minmax(155px,1fr)); gap: 16px; margin-bottom: 28px; }
+  .kpi {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: var(--card-radius); padding: 20px 20px 16px; position: relative; overflow: hidden;
+  }
+  .kpi::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; border-radius:16px 16px 0 0; }
+  .kpi.blue::before   { background: var(--accent); }
+  .kpi.green::before  { background: var(--accent3); }
+  .kpi.amber::before  { background: var(--accent4); }
+  .kpi.red::before    { background: var(--accent5); }
+  .kpi.purple::before { background: var(--accent2); }
+  .kpi.teal::before   { background: #14b8a6; }
+  .kpi .label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .6px; }
+  .kpi .value { font-size: 36px; font-weight: 800; margin-top: 6px; line-height: 1; }
+  .kpi .sub   { font-size: 12px; color: var(--muted); margin-top: 6px; }
+
+  /* ââ Grid ââ */
+  .grid { display: grid; gap: 20px; }
+  .grid-2  { grid-template-columns: repeat(2, 1fr); }
+  .grid-3  { grid-template-columns: repeat(3, 1fr); }
+  .col-2   { grid-column: span 2; }
+  .col-3   { grid-column: span 3; }
+
+  .card {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: var(--card-radius); padding: 24px;
+  }
+  .card h2    { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .card .sub  { font-size: 12px; color: var(--muted); margin-bottom: 20px; }
+  canvas { max-height: 300px; }
+
+  /* ââ Alert ââ */
+  .alert {
+    background: rgba(239,68,68,.08); border: 1px solid rgba(239,68,68,.3);
+    border-radius: 10px; padding: 14px 18px;
+    display: flex; align-items: center; gap: 14px; margin-bottom: 20px;
+  }
+  .alert .dot { width:10px;height:10px;border-radius:50%;background:var(--accent5);flex-shrink:0;animation:pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.3} }
+  .alert .msg { font-size: 13px; }
+  .alert .msg strong { color: var(--accent5); }
+
+  /* ââ Heatmap ââ */
+  .heatmap-grid { display:flex;flex-direction:column;gap:6px;margin-top:8px; }
+  .heatmap-row  { display:flex;align-items:center;gap:6px; }
+  .heatmap-row .row-label { width:100px;font-size:11px;color:var(--muted);text-align:right;padding-right:8px;flex-shrink:0; }
+  .heatmap-cells { display:flex;gap:4px;flex-wrap:wrap; }
+  .heat-cell {
+    width:34px;height:28px;border-radius:5px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:10px;font-weight:600;color:#fff;cursor:default;
+    transition:transform .15s;position:relative;
+  }
+  .heat-cell:hover { transform:scale(1.2);z-index:10; }
+  .heat-cell .tip {
+    display:none;position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);
+    background:#1e2533;border:1px solid var(--border);border-radius:6px;padding:4px 8px;
+    font-size:10px;white-space:nowrap;color:var(--text);pointer-events:none;
+  }
+  .heat-cell:hover .tip { display:block; }
+
+  /* ââ Slow list ââ */
+  .issue-list { display:flex;flex-direction:column;gap:8px;max-height:300px;overflow-y:auto;padding-right:4px; }
+  .issue-list::-webkit-scrollbar { width:4px; }
+  .issue-list::-webkit-scrollbar-thumb { background:var(--border);border-radius:4px; }
+  .issue-item {
+    display:flex;align-items:center;gap:10px;
+    padding:9px 12px;background:#1a1f2e;border-radius:10px;font-size:12px;
+  }
+  .issue-item .dot2 { width:8px;height:8px;border-radius:50%;flex-shrink:0; }
+  .issue-item .ticket { color:var(--accent);font-weight:600;flex-shrink:0;width:96px; }
+  .days-bar-wrap { width:70px;background:#252b38;border-radius:4px;height:5px;overflow:hidden;flex-shrink:0; }
+  .days-bar { height:100%;border-radius:4px; }
+
+  section { margin-bottom: 24px; }
+  section > h3 { font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:14px;padding-left:4px; }
+
+  @media(max-width:900px){
+    .grid-2,.grid-3 { grid-template-columns:1fr; }
+    .col-2,.col-3   { grid-column:span 1; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="title-block">
+    <h1>OKX Web3 Infra Â· Issue Dashboard</h1>
+    <p>META Ticket tracker Â· Sep 2025 â Mar 2026 Â· 47 records Â· refreshed 2026-03-12</p>
+  </div>
+  <div class="badge">Live data <span>â</span></div>
+</header>
+
+<div class="alert">
+  <div class="dot"></div>
+  <div class="msg"><strong>1 Open Issue</strong> â META-25992 Â· Incorrect "Risky" token label Â· Reported 2026-03-12 Â· No assignee assigned yet</div>
+</div>
+
+<!-- KPIs -->
+<section>
+  <h3>At a Glance</h3>
+  <div class="kpi-row">
+    <div class="kpi blue">
+      <div class="label">Total Records</div>
+      <div class="value" style="color:var(--accent)">47</div>
+      <div class="sub">Sep 2025 â Mar 2026</div>
+    </div>
+    <div class="kpi blue">
+      <div class="label">Real Issues</div>
+      <div class="value" style="color:var(--accent)">39</div>
+      <div class="sub">8 quiet weeks excluded</div>
+    </div>
+    <div class="kpi green">
+      <div class="label">Resolved</div>
+      <div class="value" style="color:var(--accent3)">38</div>
+      <div class="sub">97% resolution rate</div>
+    </div>
+    <div class="kpi red">
+      <div class="label">Open</div>
+      <div class="value" style="color:var(--accent5)">1</div>
+      <div class="sub">META-25992</div>
+    </div>
+    <div class="kpi teal">
+      <div class="label">Same-Day Fix</div>
+      <div class="value" style="color:#14b8a6">79%</div>
+      <div class="sub">30 of 38 resolved tickets</div>
+    </div>
+    <div class="kpi amber">
+      <div class="label">Avg Resolution</div>
+      <div class="value" style="color:var(--accent4)">0.34</div>
+      <div class="sub">days (â 8 hours)</div>
+    </div>
+  </div>
+</section>
+
+<!-- 1. Time Series -->
+<section>
+  <h3>Volume Over Time</h3>
+  <div class="card">
+    <h2>â  Weekly Ticket Volume</h2>
+    <div class="sub">Issue count per week Â· Sep 2025 â Mar 2026</div>
+    <canvas id="timeSeries"></canvas>
+  </div>
+</section>
+
+<!-- 2 + 3 -->
+<section>
+  <h3>Category & Personnel</h3>
+  <div class="grid grid-3">
+    <div class="card">
+      <h2>â¡ Issue Type Breakdown</h2>
+      <div class="sub">By primary category</div>
+      <canvas id="issueType"></canvas>
+    </div>
+    <div class="card col-2">
+      <h2>â¢ Tickets Handled per Engineer / PM</h2>
+      <div class="sub">Includes new team members Jerny Dai & Tengfei Wang</div>
+      <canvas id="personnel"></canvas>
+    </div>
+  </div>
+</section>
+
+<!-- 4 + 5 -->
+<section>
+  <h3>Resolution Patterns & Root Causes</h3>
+  <div class="grid grid-2">
+    <div class="card">
+      <h2>â£ Days to Resolve â per Ticket</h2>
+      <div class="sub">Green = same day Â· Blue = 1d Â· Amber = 2â3d Â· Red = 4d+</div>
+      <canvas id="resolutionTime"></canvas>
+    </div>
+    <div class="card">
+      <h2>â¤ Root Cause Pareto</h2>
+      <div class="sub">Issue count + cumulative % curve</div>
+      <canvas id="rootCause"></canvas>
+    </div>
+  </div>
+</section>
+
+<!-- 6 + 7 -->
+<section>
+  <h3>Team Specialisation & Speed</h3>
+  <div class="grid grid-2">
+    <div class="card">
+      <h2>â¥ Who Handles What â Heatmap</h2>
+      <div class="sub">Person Ã category Â· darker = more tickets</div>
+      <div class="heatmap-grid" id="heatmap"></div>
+    </div>
+    <div class="card">
+      <h2>â¦ Resolution Speed Distribution</h2>
+      <div class="sub">Bucketed by days to close</div>
+      <canvas id="speedDist"></canvas>
+    </div>
+  </div>
+</section>
+
+<!-- 8 + 9 -->
+<section>
+  <h3>Quarter Comparison & Slowest Tickets</h3>
+  <div class="grid grid-2">
+    <div class="card">
+      <h2>â§ Issue Mix by Quarter â Radar</h2>
+      <div class="sub">Q3 2025 vs Q4 2025 vs Q1 2026</div>
+      <canvas id="radar"></canvas>
+    </div>
+    <div class="card">
+      <h2>â¨ Slowest Resolved Tickets</h2>
+      <div class="sub">Ranked by days to close</div>
+      <div class="issue-list" id="slowList"></div>
+    </div>
+  </div>
+</section>
+
+<script>
+// âââ DATA (refreshed from Lark, 2026-03-12) âââââââââââââââââââââââââââââââââââ
+
+// Weekly counts â 27 weeks
+const weeks = [
+  "Sep 05","Sep 12","Sep 19","Sep 26","Oct 03","Oct 10","Oct 17","Oct 24",
+  "Oct 31","Nov 07","Nov 14","Nov 21","Nov 28","Dec 05","Dec 12","Dec 19",
+  "Dec 26","Jan 02","Jan 09","Jan 16","Jan 23","Jan 30","Feb 06","Feb 13",
+  "Feb 20","Feb 27","Mar 06"
+];
+const weeklyCount = [
+  4, 0, 0, 4, 3, 1, 4, 3,
+  3, 2, 0, 0, 0, 0, 2, 0,
+  1, 1, 0, 1, 2, 1, 0, 0,
+  1, 1, 5
+];
+
+// Categories (primary classification of 39 real issues)
+const categories = {
+  "K-line / Price":    11,
+  "Token Metadata":     9,
+  "Liquidity & Supply": 7,
+  "Tx Cost / PnL":      4,
+  "Limit Orders":       3,
+  "Risk Tags":          3,
+  "Search / Display":   2
+};
+
+// Personnel (updated: Jerny Dai +1, Tengfei Wang +1, counts recomputed)
+const people = {
+  "Jackie Wu":    12,
+  "Eva Yang":      9,
+  "Cai Shuai":     9,
+  "Tiffany Lee":   7,
+  "Perry Liu":     6,
+  "Marco Yang":    3,
+  "Ryan Xu":       2,
+  "Jerny Dai":     1,
+  "Tengfei Wang":  1
+};
+
+// Root causes
+const rootCauses = [
+  { cause: "Quote Token Misconfiguration", count: 11 },
+  { cause: "Data Source Disagreement",     count: 7  },
+  { cause: "Flink / Cache Dirty Data",     count: 4  },
+  { cause: "Risk Label False Positive",    count: 3  },
+  { cause: "Case Sensitivity Bug",         count: 3  },
+  { cause: "MEV Attack Anomaly",           count: 2  },
+  { cause: "Concurrency Race Condition",   count: 2  },
+  { cause: "Other / Unknown",              count: 7  },
+];
+
+// Resolution times â computed from actual timestamps (updated)
+const resolutionData = [
+  { id: "META-21869", days: 4, cat: "Display" },
+  { id: "META-25944", days: 2, cat: "Liquidity" },
+  { id: "META-25927", days: 1, cat: "Tx/PnL" },
+  { id: "META-25521", days: 1, cat: "Metadata" },
+  { id: "META-24852", days: 1, cat: "Liquidity" },
+  { id: "META-23758", days: 1, cat: "Tx/PnL" },
+  { id: "FEED-16808", days: 1, cat: "Liquidity" },
+  { id: "META-23375", days: 1, cat: "Limit Orders" },
+  { id: "META-22890", days: 1, cat: "K-line" },
+  { id: "META-25939", days: 0, cat: "K-line" },
+  { id: "META-25968", days: 0, cat: "Metadata" },
+  { id: "META-25985", days: 0, cat: "Metadata" },
+  { id: "META-25794", days: 0, cat: "Metadata" },
+  { id: "META-25348", days: 0, cat: "Liquidity" },
+  { id: "META-25368", days: 0, cat: "Liquidity" },
+  { id: "META-25251", days: 0, cat: "K-line" },
+  { id: "META-24964", days: 0, cat: "Metadata" },
+  { id: "META-24601", days: 0, cat: "Risk Tags" },
+  { id: "META-24669", days: 0, cat: "K-line" },
+  { id: "META-23915", days: 0, cat: "Liquidity" },
+  { id: "META-23985", days: 0, cat: "K-line" },
+  { id: "META-23765", days: 0, cat: "Liquidity" },
+  { id: "META-23844", days: 0, cat: "K-line" },
+  { id: "META-23520", days: 0, cat: "K-line" },
+  { id: "META-23607", days: 0, cat: "Risk Tags" },
+  { id: "META-23304", days: 0, cat: "K-line" },
+  { id: "META-23323", days: 0, cat: "K-line" },
+  { id: "META-23394", days: 0, cat: "Metadata" },
+  { id: "META-23262", days: 0, cat: "Limit Orders" },
+  { id: "META-22926", days: 0, cat: "Tx/PnL" },
+  { id: "META-22928", days: 0, cat: "Metadata" },
+  { id: "META-22627", days: 0, cat: "K-line" },
+  { id: "META-22674", days: 0, cat: "Search" },
+  { id: "META-22740", days: 0, cat: "Limit Orders" },
+  { id: "META-22769", days: 0, cat: "Search" },
+  { id: "META-21832", days: 0, cat: "Liquidity" },
+  { id: "META-21922", days: 0, cat: "Risk Tags" },
+  { id: "META-21987", days: 0, cat: "K-line" },
+];
+
+// Person Ã Category heatmap (updated)
+const heatPersons = ["Jackie","Eva","Cai Shuai","Tiffany","Perry","Marco"];
+const heatCats = ["K-line","Metadata","Liquidity","Tx/PnL","Limit Orders","Risk Tags","Search"];
+const heatData = [
+  // Jackie Eva  Cai  Tiffany Perry Marco
+  [  6,    0,    4,    1,      2,    0  ],  // K-line
+  [  0,    7,    1,    2,      0,    0  ],  // Metadata
+  [  1,    1,    3,    0,      1,    2  ],  // Liquidity
+  [  2,    0,    0,    1,      2,    0  ],  // Tx/PnL
+  [  3,    0,    0,    0,      2,    1  ],  // Limit Orders
+  [  0,    0,    0,    2,      0,    0  ],  // Risk Tags
+  [  0,    1,    1,    1,      0,    0  ],  // Search
+];
+
+// Quarterly radar
+const radarCats = ["K-line","Metadata","Liquidity","Limit Ord","Tx/PnL","Risk Tags","Search"];
+const q3Data = [4, 2, 2, 1, 1, 0, 2];
+const q4Data = [6, 4, 3, 2, 2, 2, 0];
+const q1Data = [1, 3, 2, 0, 1, 1, 0];
+
+// âââ PALETTE âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+const P = ["#3b82f6","#6366f1","#10b981","#f59e0b","#ef4444","#8b5cf6","#ec4899","#14b8a6","#64748b"];
+
+// âââ 1. TIME SERIES âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+new Chart(document.getElementById("timeSeries"),{
+  type:"line",
+  data:{
+    labels: weeks,
+    datasets:[{
+      label:"Issues",
+      data: weeklyCount,
+      borderColor:"#3b82f6",
+      backgroundColor:"rgba(59,130,246,0.07)",
+      pointBackgroundColor: weeklyCount.map(v=>v>0?"#3b82f6":"transparent"),
+      pointRadius: weeklyCount.map(v=>v>0?5:2),
+      tension:0.4, fill:true, borderWidth:2.5
+    }]
+  },
+  options:{
+    responsive:true,
+    plugins:{
+      legend:{display:false},
+      tooltip:{callbacks:{label:ctx=>` ${ctx.raw} issue${ctx.raw!==1?"s":""}`}}
+    },
+    scales:{
+      x:{ticks:{color:"#64748b",font:{size:10},maxRotation:45},grid:{color:"#1e2533"}},
+      y:{ticks:{color:"#64748b",stepSize:1},grid:{color:"#1e2533"},min:0,max:7}
+    }
+  }
+});
+
+// âââ 2. DONUT âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+new Chart(document.getElementById("issueType"),{
+  type:"doughnut",
+  data:{
+    labels: Object.keys(categories),
+    datasets:[{
+      data: Object.values(categories),
+      backgroundColor:P, borderColor:"#161a23", borderWidth:3, hoverOffset:8
+    }]
+  },
+  options:{
+    responsive:true, cutout:"62%",
+    plugins:{
+      legend:{position:"bottom",labels:{color:"#94a3b8",font:{size:10},padding:10,boxWidth:10}},
+      tooltip:{callbacks:{label:ctx=>` ${ctx.label}: ${ctx.raw} (${Math.round(ctx.raw/39*100)}%)`}}
+    }
+  }
+});
+
+// âââ 3. PERSONNEL BAR ââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+new Chart(document.getElementById("personnel"),{
+  type:"bar",
+  data:{
+    labels: Object.keys(people),
+    datasets:[{
+      label:"Tickets", data:Object.values(people),
+      backgroundColor:P, borderRadius:6, borderSkipped:false
+    }]
+  },
+  options:{
+    indexAxis:"y", responsive:true,
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.raw} tickets`}}},
+    scales:{
+      x:{ticks:{color:"#64748b",stepSize:2},grid:{color:"#1e2533"}},
+      y:{ticks:{color:"#94a3b8",font:{size:12}},grid:{display:false}}
+    }
+  }
+});
+
+// âââ 4. RESOLUTION TIME BAR ââââââââââââââââââââââââââââââââââââââââââââââââââ
+const sorted38 = [...resolutionData].sort((a,b)=>b.days-a.days);
+new Chart(document.getElementById("resolutionTime"),{
+  type:"bar",
+  data:{
+    labels: sorted38.map(d=>d.id),
+    datasets:[{
+      label:"Days",
+      data: sorted38.map(d=>d.days),
+      backgroundColor: sorted38.map(d=>d.days===0?"#10b981":d.days<=1?"#3b82f6":d.days<=3?"#f59e0b":"#ef4444"),
+      borderRadius:3, borderSkipped:false
+    }]
+  },
+  options:{
+    responsive:true,
+    plugins:{
+      legend:{display:false},
+      tooltip:{callbacks:{
+        label:ctx=>` ${ctx.raw} day${ctx.raw!==1?"s":""}`,
+        afterLabel:ctx=>sorted38[ctx.dataIndex].cat
+      }}
+    },
+    scales:{
+      x:{ticks:{color:"#64748b",font:{size:8},maxRotation:65},grid:{color:"#1e2533"}},
+      y:{ticks:{color:"#64748b",stepSize:1},grid:{color:"#1e2533"}}
+    }
+  }
+});
+
+// âââ 5. PARETO ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+const pSorted = [...rootCauses].sort((a,b)=>b.count-a.count);
+const pTotal  = pSorted.reduce((s,d)=>s+d.count,0);
+let cumSum=0;
+const cumPct = pSorted.map(d=>{cumSum+=d.count;return Math.round(cumSum/pTotal*100);});
+new Chart(document.getElementById("rootCause"),{
+  type:"bar",
+  data:{
+    labels: pSorted.map(d=>d.cause.length>18?d.cause.substring(0,18)+"â¦":d.cause),
+    datasets:[
+      {type:"bar", label:"Count", data:pSorted.map(d=>d.count),
+       backgroundColor:"#6366f1", borderRadius:5, yAxisID:"y"},
+      {type:"line", label:"Cumulative %", data:cumPct,
+       borderColor:"#f59e0b", backgroundColor:"transparent",
+       pointBackgroundColor:"#f59e0b", pointRadius:4, tension:0.3, yAxisID:"y2", borderWidth:2}
+    ]
+  },
+  options:{
+    responsive:true,
+    plugins:{legend:{labels:{color:"#94a3b8",font:{size:11}}},
+      tooltip:{callbacks:{label:ctx=>ctx.datasetIndex===0?` ${ctx.raw} issues`:` ${ctx.raw}%`}}},
+    scales:{
+      x:{ticks:{color:"#64748b",font:{size:9},maxRotation:40},grid:{color:"#1e2533"}},
+      y:{ticks:{color:"#64748b",stepSize:2},grid:{color:"#1e2533"}},
+      y2:{position:"right",min:0,max:100,
+          ticks:{color:"#f59e0b",callback:v=>v+"%"},grid:{display:false}}
+    }
+  }
+});
+
+// âââ 6. HEATMAP ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+const heatEl = document.getElementById("heatmap");
+const maxVal = Math.max(...heatData.flat());
+// header row
+const hRow = document.createElement("div"); hRow.className="heatmap-row";
+const lbl0 = document.createElement("div"); lbl0.className="row-label"; hRow.appendChild(lbl0);
+const hCells = document.createElement("div"); hCells.className="heatmap-cells";
+heatPersons.forEach(p=>{
+  const h=document.createElement("div");
+  h.style.cssText="width:34px;font-size:9px;color:#64748b;text-align:center;line-height:1.2;";
+  h.textContent=p; hCells.appendChild(h);
+});
+hRow.appendChild(hCells); heatEl.appendChild(hRow);
+heatCats.forEach((cat,ci)=>{
+  const row=document.createElement("div"); row.className="heatmap-row";
+  const lbl=document.createElement("div"); lbl.className="row-label"; lbl.textContent=cat;
+  row.appendChild(lbl);
+  const cells=document.createElement("div"); cells.className="heatmap-cells";
+  heatPersons.forEach((_,pi)=>{
+    const val=heatData[ci][pi];
+    const cell=document.createElement("div"); cell.className="heat-cell";
+    const alpha=val===0?0:0.15+(val/maxVal)*0.85;
+    cell.style.background=val===0?"#1a1f2e":`rgba(99,102,241,${alpha.toFixed(2)})`;
+    cell.textContent=val>0?val:"";
+    const tip=document.createElement("span"); tip.className="tip";
+    tip.textContent=`${heatPersons[pi]} Â· ${cat}: ${val}`;
+    cell.appendChild(tip); cells.appendChild(cell);
+  });
+  row.appendChild(cells); heatEl.appendChild(row);
+});
+
+// âââ 7. SPEED DISTRIBUTION âââââââââââââââââââââââââââââââââââââââââââââââââââ
+const buckets={"Same-day (0d)":0,"1 day":0,"2â3 days":0,"4â7 days":0,">7 days":0};
+resolutionData.forEach(d=>{
+  if(d.days===0)      buckets["Same-day (0d)"]++;
+  else if(d.days===1) buckets["1 day"]++;
+  else if(d.days<=3)  buckets["2â3 days"]++;
+  else if(d.days<=7)  buckets["4â7 days"]++;
+  else                buckets[">7 days"]++;
+});
+new Chart(document.getElementById("speedDist"),{
+  type:"bar",
+  data:{
+    labels:Object.keys(buckets),
+    datasets:[{
+      data:Object.values(buckets),
+      backgroundColor:["#10b981","#3b82f6","#6366f1","#f59e0b","#ef4444"],
+      borderRadius:8,borderSkipped:false
+    }]
+  },
+  options:{
+    responsive:true,
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.raw} tickets`}}},
+    scales:{
+      x:{ticks:{color:"#64748b",font:{size:11}},grid:{color:"#1e2533"}},
+      y:{ticks:{color:"#64748b",stepSize:5},grid:{color:"#1e2533"}}
+    }
+  }
+});
+
+// âââ 8. RADAR ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+new Chart(document.getElementById("radar"),{
+  type:"radar",
+  data:{
+    labels:radarCats,
+    datasets:[
+      {label:"Q3 2025",data:q3Data,borderColor:"#10b981",backgroundColor:"rgba(16,185,129,.1)",pointBackgroundColor:"#10b981",borderWidth:2},
+      {label:"Q4 2025",data:q4Data,borderColor:"#ef4444",backgroundColor:"rgba(239,68,68,.1)", pointBackgroundColor:"#ef4444",borderWidth:2},
+      {label:"Q1 2026",data:q1Data,borderColor:"#3b82f6",backgroundColor:"rgba(59,130,246,.1)",pointBackgroundColor:"#3b82f6",borderWidth:2},
+    ]
+  },
+  options:{
+    responsive:true,
+    plugins:{legend:{labels:{color:"#94a3b8",font:{size:11}}}},
+    scales:{r:{
+      ticks:{color:"#64748b",backdropColor:"transparent",font:{size:9}},
+      grid:{color:"#252b38"},pointLabels:{color:"#94a3b8",font:{size:11}},min:0
+    }}
+  }
+});
+
+// âââ 9. SLOWEST LIST âââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+const slowEl = document.getElementById("slowList");
+const top10  = [...resolutionData].sort((a,b)=>b.days-a.days).slice(0,10);
+const maxDays= top10[0].days;
+const C = ["#ef4444","#f59e0b","#f59e0b","#3b82f6","#3b82f6","#3b82f6","#3b82f6","#3b82f6","#10b981","#10b981"];
+top10.forEach((t,i)=>{
+  const item=document.createElement("div"); item.className="issue-item";
+  item.innerHTML=`
+    <div class="dot2" style="background:${C[i]}"></div>
+    <div class="ticket">${t.id}</div>
+    <div style="color:#94a3b8;flex:1;font-size:11px">${t.cat}</div>
+    <div style="color:${C[i]};font-weight:600;min-width:28px;text-align:right">${t.days}d</div>
+    <div class="days-bar-wrap">
+      <div class="days-bar" style="width:${Math.max(4,t.days/maxDays*100)}%;background:${C[i]}"></div>
+    </div>`;
+  slowEl.appendChild(item);
+});
+</script>
+</body>
+</html>
