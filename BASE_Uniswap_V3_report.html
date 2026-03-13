@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Uniswap V3 · BASE · 预发验收报告</title>
+<style>
+  :root {
+    --green: #22c55e; --red: #ef4444; --yellow: #f59e0b;
+    --blue: #3b82f6; --gray: #6b7280; --bg: #0f172a;
+    --surface: #1e293b; --surface2: #263348; --border: #334155;
+    --text: #e2e8f0; --text-muted: #94a3b8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'SF Mono', 'Fira Code', monospace; font-size: 13px; line-height: 1.6; padding: 32px; }
+  .page { max-width: 1600px; margin: 0 auto; }
+
+  /* Header */
+  .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+  .header-left h1 { font-size: 22px; font-weight: 700; color: #f1f5f9; letter-spacing: -0.5px; }
+  .header-left .subtitle { color: var(--text-muted); font-size: 12px; margin-top: 4px; }
+  .badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; letter-spacing: 0.5px; }
+  .badge-pass { background: rgba(34,197,94,0.15); color: var(--green); border: 1px solid rgba(34,197,94,0.3); }
+  .badge-chain { background: rgba(59,130,246,0.15); color: var(--blue); border: 1px solid rgba(59,130,246,0.3); }
+
+  /* Cards */
+  .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px; }
+  .card-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
+  .card-value { font-size: 26px; font-weight: 700; line-height: 1; }
+  .card-sub { font-size: 11px; color: var(--text-muted); margin-top: 6px; }
+  .val-green { color: var(--green); }
+  .val-blue { color: var(--blue); }
+  .val-yellow { color: var(--yellow); }
+  .val-gray { color: var(--text-muted); }
+
+  /* Section */
+  .section { margin-bottom: 28px; }
+  .section-title { font-size: 13px; font-weight: 600; color: #f1f5f9; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .section-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--blue); border-radius: 2px; }
+
+  /* Table */
+  .tbl-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow-x: auto; }
+  .tbl-wrap::-webkit-scrollbar { height: 6px; }
+  .tbl-wrap::-webkit-scrollbar-track { background: var(--surface2); border-radius: 0 0 10px 10px; }
+  .tbl-wrap::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+  .tbl-wrap::-webkit-scrollbar-thumb:hover { background: #64748b; }
+  table { width: max-content; min-width: 100%; border-collapse: collapse; }
+  thead tr { background: var(--surface2); }
+  th { padding: 10px 14px; text-align: left; font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px; white-space: nowrap; border-bottom: 1px solid var(--border); }
+  td { padding: 9px 14px; border-bottom: 1px solid rgba(51,65,85,0.5); font-size: 12px; white-space: nowrap; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+  .mono { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 11px; }
+  .addr { color: #93c5fd; }
+  .hash { color: #c4b5fd; }
+
+  /* Status badges */
+  .st { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+  .st-pass { background: rgba(34,197,94,0.12); color: var(--green); }
+  .st-swap { background: rgba(99,102,241,0.12); color: #a5b4fc; }
+  .st-warn { background: rgba(245,158,11,0.12); color: var(--yellow); }
+  .st-fail { background: rgba(239,68,68,0.12); color: var(--red); }
+
+  /* Summary box */
+  .summary { background: rgba(34,197,94,0.06); border: 1px solid rgba(34,197,94,0.2); border-radius: 10px; padding: 16px 20px; margin-bottom: 28px; }
+  .summary p { color: #86efac; font-size: 12px; line-height: 1.8; }
+  .summary strong { color: #4ade80; }
+
+  /* Footer */
+  .footer { border-top: 1px solid var(--border); padding-top: 16px; display: flex; justify-content: space-between; color: var(--text-muted); font-size: 11px; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <h1>Uniswap V3 · 预发验收报告</h1>
+      <div class="subtitle">projectId=68 &nbsp;·&nbsp; chainId=8453 &nbsp;·&nbsp; 2026-03-13 &nbsp;·&nbsp; 数据源: GeckoTerminal</div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <span class="badge badge-chain">BASE</span>
+      <span class="badge badge-pass">✓ PASS</span>
+    </div>
+  </div>
+
+  <!-- Summary cards -->
+  <div class="cards">
+    <div class="card">
+      <div class="card-label">LP Diff 率</div>
+      <div class="card-value val-green">0.0%</div>
+      <div class="card-sub">0 异常 / 10 池</div>
+    </div>
+    <div class="card">
+      <div class="card-label">TX Diff 率</div>
+      <div class="card-value val-green">0.0%</div>
+      <div class="card-sub">0 异常 / 6 条</div>
+    </div>
+    <div class="card">
+      <div class="card-label">ORDER_SWAPPED</div>
+      <div class="card-value val-yellow">7</div>
+      <div class="card-sub">池子 token[0]/token[1] 顺序与 Gecko 相反，数据本身一致，不计 diff</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Gecko 未收录</div>
+      <div class="card-value val-gray">0</div>
+      <div class="card-sub">10/10 池命中</div>
+    </div>
+  </div>
+
+  <!-- Summary text -->
+  <div class="summary">
+    <p>
+      预发数据与 GeckoTerminal 第三方数据高度吻合。<strong>10 个 LP 池</strong>全部通过，token 地址/symbol/decimals/reserve 均一致，其中 <strong>7 个池触发 ORDER_SWAPPED</strong>——即预发推送的 <code style="background:rgba(255,255,255,0.08);padding:1px 5px;border-radius:3px">tokenList[0]/tokenList[1]</code> 顺序与 Gecko 的 base_token/quote_token 相反，属池子 token 排列差异，数据本身完全一致，不计入 diff。<br>
+      <strong>6 条 TX</strong> 全部通过，tokenIn/Out 地址及金额精确匹配（误差 &lt; 0.01%）。结论：预发推送正常，无需关注。
+    </p>
+  </div>
+
+  <!-- LP Table -->
+  <div class="section">
+    <div class="section-title">LP 池对比明细（取最新 10 池，blockHeight 43289624–43289625）</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Pool Address</th>
+            <th>Pair</th>
+            <th>Block</th>
+            <th>Gecko 状态</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="mono addr">0xc1b342dee1270fc404944ca42b45142316d0ae95</td>
+            <td>WETH / Out</td>
+            <td>43289625</td>
+            <td><span class="st st-pass">✅ PASS</span> <span class="st st-swap" title="预发 tokenList[0]=WETH / tokenList[1]=Out，与 Gecko base=Out / quote=WETH 顺序相反">🔀 token顺序相反</span></td>
+          </tr>
+          <tr>
+            <td class="mono addr">0xf83328052f84864a83057f408cfa1e34c3fe0691</td>
+            <td>WETH / TELI</td>
+            <td>43289625</td>
+            <td><span class="st st-pass">✅ PASS</span> <span class="st st-swap" title="预发 tokenList[0]=WETH / tokenList[1]=TELI，与 Gecko base=TELI / quote=WETH 顺序相反">🔀 token顺序相反</span></td>
+          </tr>
+          <tr>
+            <td class="mono addr">0x192a0d566c07878b5f46d35d38b25ef683fbb830</td>
+            <td>WETH / NPC</td>
+            <td>43289625</td>
+            <td><span class="st st-pass">✅ PASS</span> <span class="st st-swap" title="预发 tokenList[0]=WETH / tokenList[1]=NPC，与 Gecko base=NPC / quote=WETH 顺序相反">🔀 token顺序相反</span></td>
+          </tr>
+          <tr>
+            <td class="mono addr">0xd0b53d9277642d899df5c87a3966a349a798f224</td>
+            <td>USDC / WETH</td>
+            <td>43289625</td>
+            <td><span class="st st-pass">✅ PASS</span></td>
+          </tr>
+          <tr>
+            <td class="mono addr">0xedc625b74537ee3a10874f53d170e9c17a906b9c</td>
+            <td>ZORA / USDC</td>
+            <td>43289625</td>
+            <td><span class="st st-pass">✅ PASS</span></td>
+          </tr>
+          <tr>
+            <td class="mono addr">0x29183f918920a2aef0115a9c7374945589968aea</td>
+            <td>SOSO / USDC</td>
+            <td>43289625</td>
+            <td><span class="st st-pass">✅ PASS</span></td>
+          </tr>
+          <tr>
+            <td class="mono addr">0x8408c2a9f28b9a9471dc423f3cd4868629b555c8</td>
+            <td>USDC / RNBW</td>
+            <td>43289625</td>
+            <td><span class="st st-pass">✅ PASS</span> <span class="st st-swap">🔀 token顺序相反</span></td>
+          </tr>
+          <tr>
+            <td class="mono addr">0xba4325479cc8be38255a0f5212db672c134b1d78</td>
+            <td>WETH / UNI</td>
+            <td>43289625</td>
+            <td><span class="st st-pass">✅ PASS</span> <span class="st st-swap">🔀 token顺序相反</span></td>
+          </tr>
+          <tr>
+            <td class="mono addr">0xf252f51919dfca2c9c0ea279f11183580edee4d6</td>
+            <td>USDC / OWB</td>
+            <td>43289624</td>
+            <td><span class="st st-pass">✅ PASS</span> <span class="st st-swap">🔀 token顺序相反</span></td>
+          </tr>
+          <tr>
+            <td class="mono addr">0x2e86514cfd61fb19c5cf2b879d536d273d6e693d</td>
+            <td>WETH / AAVE</td>
+            <td>43289624</td>
+            <td><span class="st st-pass">✅ PASS</span> <span class="st st-swap">🔀 token顺序相反</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+<!-- TX Table -->
+  <div class="section">
+    <div class="section-title">TX 对比明细（取最新 2 池各前 3 条，共 6 条）</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>txHash</th>
+            <th>pool_address</th>
+            <th>block</th>
+            <th>token_in_address</th>
+            <th>pre_in_amount</th>
+            <th>gecko_in_amount</th>
+            <th>token_out_address</th>
+            <th>pre_out_amount</th>
+            <th>gecko_out_amount</th>
+            <th>状态</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="mono hash">0x7f3e69205ebc329e299bffd30d5183ad3f6ac6abcb0f00f65344a6332ca82744</td>
+            <td class="mono addr">0xc1b342dee1270fc404944ca42b45142316d0ae95</td>
+            <td>43289736</td>
+            <td class="mono addr">0xbc74eaa37a1ae78939f6bac0794ce30c964704ba</td>
+            <td>2,631,444.28</td>
+            <td>2,631,444.28</td>
+            <td class="mono addr">0x4200000000000000000000000000000000000006</td>
+            <td>0.208884246179</td>
+            <td>0.208884246179</td>
+            <td><span class="st st-pass">✅ PASS</span></td>
+          </tr>
+          <tr>
+            <td class="mono hash">0xce908b8fbb5978ead706db441e81bf49a81142a81833a8c6eab39341750483fd</td>
+            <td class="mono addr">0xc1b342dee1270fc404944ca42b45142316d0ae95</td>
+            <td>43289734</td>
+            <td class="mono addr">0xbc74eaa37a1ae78939f6bac0794ce30c964704ba</td>
+            <td>1,009,494.93</td>
+            <td>1,009,494.93</td>
+            <td class="mono addr">0x4200000000000000000000000000000000000006</td>
+            <td>0.081306861002</td>
+            <td>0.081306861002</td>
+            <td><span class="st st-pass">✅ PASS</span></td>
+          </tr>
+          <tr>
+            <td class="mono hash">0xe40aa22409e7752edbff697c151e30796834ed1ab3fa008f22b85fb281b87783</td>
+            <td class="mono addr">0xc1b342dee1270fc404944ca42b45142316d0ae95</td>
+            <td>43289734</td>
+            <td class="mono addr">0xbc74eaa37a1ae78939f6bac0794ce30c964704ba</td>
+            <td>277,636.71</td>
+            <td>277,636.71</td>
+            <td class="mono addr">0x4200000000000000000000000000000000000006</td>
+            <td>0.022477301722</td>
+            <td>0.022477301722</td>
+            <td><span class="st st-pass">✅ PASS</span></td>
+          </tr>
+          <tr>
+            <td class="mono hash">0x7b1717fb5282304cb6a2ed7e3186af483394ec8970da777419e2d1b35cad4c37</td>
+            <td class="mono addr">0xf83328052f84864a83057f408cfa1e34c3fe0691</td>
+            <td>43289735</td>
+            <td class="mono addr">0x4200000000000000000000000000000000000006</td>
+            <td>0.002000000000</td>
+            <td>0.002000000000</td>
+            <td class="mono addr">0xa681c99b9cf37f11730488e76bfd2b4b7316c118</td>
+            <td>1,802,849.90</td>
+            <td>1,802,849.90</td>
+            <td><span class="st st-pass">✅ PASS</span></td>
+          </tr>
+          <tr>
+            <td class="mono hash">0x7f28e9196baf44a3feb76466f9e0cc89cf3a458b30dd06d21e975ccb8063702a</td>
+            <td class="mono addr">0xf83328052f84864a83057f408cfa1e34c3fe0691</td>
+            <td>43289734</td>
+            <td class="mono addr">0x4200000000000000000000000000000000000006</td>
+            <td>0.200000000000</td>
+            <td>0.200000000000</td>
+            <td class="mono addr">0xa681c99b9cf37f11730488e76bfd2b4b7316c118</td>
+            <td>206,695,662.33</td>
+            <td>206,695,662.33</td>
+            <td><span class="st st-pass">✅ PASS</span></td>
+          </tr>
+          <tr>
+            <td class="mono hash">0x0e3fd4e4e4392f568cbecea4c3785f77ea804e3382659e6c3604e5da366bb332</td>
+            <td class="mono addr">0xf83328052f84864a83057f408cfa1e34c3fe0691</td>
+            <td>43289734</td>
+            <td class="mono addr">0x4200000000000000000000000000000000000006</td>
+            <td>0.200000000000</td>
+            <td>0.200000000000</td>
+            <td class="mono addr">0xa681c99b9cf37f11730488e76bfd2b4b7316c118</td>
+            <td>209,378,772.09</td>
+            <td>209,378,772.09</td>
+            <td><span class="st st-pass">✅ PASS</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <span>生成时间：2026-03-13 &nbsp;·&nbsp; 预发环境 &nbsp;·&nbsp; 数据源：GeckoTerminal API v2</span>
+    <span>查询区间：最近 48h &nbsp;·&nbsp; 预发池子总数：228 &nbsp;·&nbsp; 取最新 10</span>
+  </div>
+
+</div>
+</body>
+</html>
