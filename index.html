@@ -62,7 +62,7 @@
 <header>
   <div class="title-block">
     <h1>OKX Web3 Infra &middot; Issue Dashboard</h1>
-    <p>META Ticket tracker &middot; Sep 2025 – Mar 2026 &middot; 39 records &middot; refreshed 2026-03-13</p>
+    <p>META Ticket tracker &middot; Sep 2025 – Mar 2026 &middot; 39 records &middot; refreshed 2026-03-18</p>
   </div>
   <div class="badge">Auto-refresh <span>&#10003;</span></div>
 </header>
@@ -158,19 +158,19 @@
 </section>
 
 <script>
-// DATA — refreshed 2026-03-13
+// DATA — refreshed 2026-03-18
 const weeks = ["Aug 29", "Sep 05", "Sep 12", "Sep 19", "Sep 26", "Oct 03", "Oct 10", "Oct 17", "Oct 24", "Oct 31", "Nov 07", "Nov 14", "Nov 21", "Nov 28", "Dec 05", "Dec 12", "Dec 19", "Dec 26", "Jan 02", "Jan 09", "Jan 16", "Jan 23", "Jan 30", "Feb 06", "Feb 13", "Feb 20", "Feb 27", "Mar 06"];
 const weeklyCount = [2, 2, 0, 1, 3, 3, 2, 4, 2, 3, 2, 0, 0, 0, 1, 1, 0, 1, 1, 0, 1, 2, 1, 0, 0, 1, 2, 4];
-const categories = {"K-line / Price": 17, "Token Metadata": 11, "Liquidity & Supply": 2, "Tx Cost / PnL": 4, "Limit Orders": 1, "Risk Tags": 2, "Search / Display": 2};
+const categories = {"K-line / Price": 16, "Token Metadata": 11, "Liquidity & Supply": 2, "Tx Cost / PnL": 2, "Limit Orders": 2, "Risk Tags": 2, "Search / Display": 4};
 const people = {"Jackie Wu": 12, "Eva Yang": 9, "Cai Shuai": 9, "Tiffany Lee": 7, "Perry": 6, "Marco Yang": 3, "Ryan Xu": 2, "Jerny Dai": 1, "Tengfei Wang": 1};
-const rootCauses = [{"cause": "Other / Unknown", "count": 26}, {"cause": "Risk Label False Positive", "count": 3}, {"cause": "Quote Token Misconfiguration", "count": 3}, {"cause": "Case Sensitivity Bug", "count": 2}, {"cause": "Flink / Cache Dirty Data", "count": 2}, {"cause": "Data Source Disagreement", "count": 1}, {"cause": "Concurrency Race Condition", "count": 1}, {"cause": "MEV Attack Anomaly", "count": 1}];
-const resolutionData = [{"id": "META-21869", "days": 4, "cat": "Search"}, {"id": "META-25944", "days": 2, "cat": "Liquidity"}, {"id": "META-25927", "days": 1, "cat": "Tx"}, {"id": "META-25521", "days": 1, "cat": "Token"}, {"id": "META-24852", "days": 1, "cat": "Token"}, {"id": "META-23758", "days": 1, "cat": "K-line"}, {"id": "TKT-0021", "days": 1, "cat": "Token"}, {"id": "META-23375", "days": 1, "cat": "Tx"}, {"id": "META-22890", "days": 1, "cat": "K-line"}, {"id": "META-25939", "days": 0, "cat": "K-line"}, {"id": "META-25968", "days": 0, "cat": "Token"}, {"id": "META-25985", "days": 0, "cat": "Token"}, {"id": "META-25794", "days": 0, "cat": "Token"}, {"id": "META-25348", "days": 0, "cat": "Token"}, {"id": "META-25368", "days": 0, "cat": "Token"}, {"id": "META-25251", "days": 0, "cat": "K-line"}, {"id": "META-24964", "days": 0, "cat": "Token"}, {"id": "META-24601", "days": 0, "cat": "Token"}, {"id": "META-24669", "days": 0, "cat": "K-line"}, {"id": "META-23915", "days": 0, "cat": "Liquidity"}, {"id": "META-23985", "days": 0, "cat": "K-line"}, {"id": "META-23765", "days": 0, "cat": "K-line"}, {"id": "META-23844", "days": 0, "cat": "K-line"}, {"id": "META-23520", "days": 0, "cat": "K-line"}, {"id": "META-23607", "days": 0, "cat": "Risk"}, {"id": "META-23304", "days": 0, "cat": "K-line"}, {"id": "META-23323", "days": 0, "cat": "K-line"}, {"id": "META-23394", "days": 0, "cat": "Search"}, {"id": "META-23262", "days": 0, "cat": "K-line"}, {"id": "META-22926", "days": 0, "cat": "Tx"}, {"id": "META-22928", "days": 0, "cat": "Token"}, {"id": "META-22627", "days": 0, "cat": "K-line"}, {"id": "META-22674", "days": 0, "cat": "K-line"}, {"id": "META-22740", "days": 0, "cat": "Limit"}, {"id": "META-22769", "days": 0, "cat": "K-line"}, {"id": "META-21832", "days": 0, "cat": "K-line"}, {"id": "META-21922", "days": 0, "cat": "Tx"}, {"id": "META-21987", "days": 0, "cat": "K-line"}];
+const rootCauses = [{"cause": "Other / Unknown", "count": 28}, {"cause": "Risk Label False Positive", "count": 3}, {"cause": "Flink / Cache Dirty Data", "count": 2}, {"cause": "Quote Token Misconfiguration", "count": 2}, {"cause": "Data Source Disagreement", "count": 1}, {"cause": "Concurrency Race Condition", "count": 1}, {"cause": "MEV Attack Anomaly", "count": 1}, {"cause": "Case Sensitivity Bug", "count": 1}];
+const resolutionData = [{"id": "META-21869", "days": 4, "cat": "Search"}, {"id": "META-25944", "days": 2, "cat": "Liquidity"}, {"id": "META-25927", "days": 1, "cat": "Tx"}, {"id": "META-25521", "days": 1, "cat": "Token"}, {"id": "META-24852", "days": 1, "cat": "Token"}, {"id": "META-23758", "days": 1, "cat": "K-line"}, {"id": "TKT-0021", "days": 1, "cat": "Token"}, {"id": "META-23375", "days": 1, "cat": "Limit"}, {"id": "META-22890", "days": 1, "cat": "K-line"}, {"id": "META-25939", "days": 0, "cat": "K-line"}, {"id": "META-25968", "days": 0, "cat": "Token"}, {"id": "META-25985", "days": 0, "cat": "Token"}, {"id": "META-25794", "days": 0, "cat": "Token"}, {"id": "META-25348", "days": 0, "cat": "Token"}, {"id": "META-25368", "days": 0, "cat": "Token"}, {"id": "META-25251", "days": 0, "cat": "K-line"}, {"id": "META-24964", "days": 0, "cat": "Token"}, {"id": "META-24601", "days": 0, "cat": "Token"}, {"id": "META-24669", "days": 0, "cat": "K-line"}, {"id": "META-23915", "days": 0, "cat": "Liquidity"}, {"id": "META-23985", "days": 0, "cat": "Token"}, {"id": "META-23765", "days": 0, "cat": "K-line"}, {"id": "META-23844", "days": 0, "cat": "K-line"}, {"id": "META-23520", "days": 0, "cat": "K-line"}, {"id": "META-23607", "days": 0, "cat": "Risk"}, {"id": "META-23304", "days": 0, "cat": "K-line"}, {"id": "META-23323", "days": 0, "cat": "K-line"}, {"id": "META-23394", "days": 0, "cat": "Search"}, {"id": "META-23262", "days": 0, "cat": "K-line"}, {"id": "META-22926", "days": 0, "cat": "Search"}, {"id": "META-22928", "days": 0, "cat": "Search"}, {"id": "META-22627", "days": 0, "cat": "K-line"}, {"id": "META-22674", "days": 0, "cat": "K-line"}, {"id": "META-22740", "days": 0, "cat": "Limit"}, {"id": "META-22769", "days": 0, "cat": "K-line"}, {"id": "META-21832", "days": 0, "cat": "K-line"}, {"id": "META-21922", "days": 0, "cat": "Tx"}, {"id": "META-21987", "days": 0, "cat": "K-line"}];
 const heatPersons = ["Jackie", "Eva", "Cai Shuai", "Tiffany", "Perry", "Marco"];
 const heatCats = ["K-line", "Metadata", "Liquidity", "Tx/PnL", "Limit Orders", "Risk Tags", "Search"];
-const heatData = [[9, 2, 5, 2, 0, 0], [1, 6, 3, 0, 0, 2], [0, 1, 1, 0, 0, 0], [2, 0, 0, 2, 0, 0], [0, 0, 0, 0, 0, 1], [0, 0, 0, 1, 0, 0], [0, 0, 0, 2, 0, 0]];
+const heatData = [[8, 2, 5, 2, 0, 0], [2, 6, 2, 0, 0, 2], [0, 1, 1, 0, 0, 0], [0, 0, 0, 2, 0, 0], [1, 0, 0, 0, 0, 1], [0, 0, 0, 1, 0, 0], [1, 0, 1, 2, 0, 0]];
 const radarCats = ["K-line", "Metadata", "Liquidity", "Limit Ord", "Tx/PnL", "Risk Tags", "Search"];
 const q3Data = [5, 0, 0, 0, 1, 0, 1];
-const q4Data = [10, 4, 1, 0, 2, 1, 1];
+const q4Data = [9, 4, 1, 0, 0, 1, 3];
 const q1Data = [2, 7, 1, 0, 1, 1, 0];
 const totalReal = 39;
 
