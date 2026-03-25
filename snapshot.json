@@ -1,7 +1,200 @@
 {
-  "last_refresh": "2026-03-18",
-  "total": 39,
-  "resolved": 38,
-  "open": 1,
-  "avg_days": 0.34
+  "last_updated": "2026-03-25",
+  "tickets": [
+    {
+      "id": "META-25939",
+      "status": "resolved",
+      "category": "K-line / Price"
+    },
+    {
+      "id": "META-25944",
+      "status": "resolved",
+      "category": "Liquidity & Supply"
+    },
+    {
+      "id": "META-25968",
+      "status": "resolved",
+      "category": "Token Metadata"
+    },
+    {
+      "id": "META-25985",
+      "status": "resolved",
+      "category": "Token Metadata"
+    },
+    {
+      "id": "META-25927",
+      "status": "resolved",
+      "category": "Tx Cost / PnL"
+    },
+    {
+      "id": "META-25794",
+      "status": "resolved",
+      "category": "Token Metadata"
+    },
+    {
+      "id": "META-25521",
+      "status": "resolved",
+      "category": "Token Metadata"
+    },
+    {
+      "id": "META-25348",
+      "status": "resolved",
+      "category": "Token Metadata"
+    },
+    {
+      "id": "META-25368",
+      "status": "resolved",
+      "category": "Token Metadata"
+    },
+    {
+      "id": "META-25251",
+      "status": "resolved",
+      "category": "K-line / Price"
+    },
+    {
+      "id": "META-24964",
+      "status": "resolved",
+      "category": "Token Metadata"
+    },
+    {
+      "id": "META-24852",
+      "status": "unknown",
+      "category": "Token Metadata"
+    },
+    {
+      "id": "META-24601",
+      "status": "resolved",
+      "category": "Token Metadata"
+    },
+    {
+      "id": "META-24669",
+      "status": "resolved",
+      "category": "K-line / Price"
+    },
+    {
+      "id": "META-23915",
+      "status": "resolved",
+      "category": "Liquidity & Supply"
+    },
+    {
+      "id": "META-23985",
+      "status": "resolved",
+      "category": "Token Metadata"
+    },
+    {
+      "id": "META-23758",
+      "status": "resolved",
+      "category": "K-line / Price"
+    },
+    {
+      "id": "META-23765",
+      "status": "resolved",
+      "category": "K-line / Price"
+    },
+    {
+      "id": "META-23844",
+      "status": "resolved",
+      "category": "K-line / Price"
+    },
+    {
+      "id": "TKT-0020",
+      "status": "resolved",
+      "category": "Token Metadata"
+    },
+    {
+      "id": "META-23520",
+      "status": "resolved",
+      "category": "K-line / Price"
+    },
+    {
+      "id": "META-23607",
+      "status": "resolved",
+      "category": "Risk Tags"
+    },
+    {
+      "id": "META-23304",
+      "status": "resolved",
+      "category": "K-line / Price"
+    },
+    {
+      "id": "META-23323",
+      "status": "resolved",
+      "category": "K-line / Price"
+    },
+    {
+      "id": "META-23375",
+      "status": "resolved",
+      "category": "Tx Cost / PnL"
+    },
+    {
+      "id": "META-23394",
+      "status": "resolved",
+      "category": "Search / Display"
+    },
+    {
+      "id": "META-23262",
+      "status": "resolved",
+      "category": "K-line / Price"
+    },
+    {
+      "id": "META-22890",
+      "status": "resolved",
+      "category": "K-line / Price"
+    },
+    {
+      "id": "META-22926",
+      "status": "resolved",
+      "category": "Tx Cost / PnL"
+    },
+    {
+      "id": "META-22928",
+      "status": "resolved",
+      "category": "Search / Display"
+    },
+    {
+      "id": "META-22627",
+      "status": "resolved",
+      "category": "K-line / Price"
+    },
+    {
+      "id": "META-22674",
+      "status": "resolved",
+      "category": "K-line / Price"
+    },
+    {
+      "id": "META-22740",
+      "status": "resolved",
+      "category": "Limit Orders"
+    },
+    {
+      "id": "META-22769",
+      "status": "resolved",
+      "category": "K-line / Price"
+    },
+    {
+      "id": "META-21832",
+      "status": "resolved",
+      "category": "K-line / Price"
+    },
+    {
+      "id": "META-21869",
+      "status": "resolved",
+      "category": "Search / Display"
+    },
+    {
+      "id": "META-21922",
+      "status": "resolved",
+      "category": "Tx Cost / PnL"
+    },
+    {
+      "id": "META-21987",
+      "status": "resolved",
+      "category": "K-line / Price"
+    },
+    {
+      "id": "META-26033",
+      "status": "resolved",
+      "category": "K-line / Price"
+    }
+  ]
 }
