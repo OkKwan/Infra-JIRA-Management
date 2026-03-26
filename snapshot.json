@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-03-25",
+  "last_updated": "2026-03-26",
   "tickets": [
     {
       "id": "META-25939",
@@ -79,7 +79,7 @@
     {
       "id": "META-23985",
       "status": "resolved",
-      "category": "Token Metadata"
+      "category": "K-line / Price"
     },
     {
       "id": "META-23758",
@@ -149,7 +149,7 @@
     {
       "id": "META-22928",
       "status": "resolved",
-      "category": "Search / Display"
+      "category": "Token Metadata"
     },
     {
       "id": "META-22627",
